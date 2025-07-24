@@ -2,41 +2,44 @@ const express = require("express");
 const puppeteer = require("puppeteer");
 
 const app = express();
-app.use(express.json());
 
-app.post("/scrape", async (req, res) => {
-  const { url } = req.body;
+app.get("/linkedin-scrape", async (req, res) => {
+  const profileUrl = req.query.url;
 
-  if (!url) return res.status(400).json({ error: "URL é obrigatória." });
+  if (!profileUrl) {
+    return res.status(400).json({ error: "Missing LinkedIn URL" });
+  }
 
   try {
     const browser = await puppeteer.launch({
       headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
+
     const page = await browser.newPage();
+    await page.goto(profileUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
 
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 });
-
-    const data = await page.evaluate(() => {
+    const result = await page.evaluate(() => {
       const name = document.querySelector("h1")?.innerText || "";
-      const title = document.querySelector(".text-body-medium")?.innerText || "";
-      const location = document.querySelector(".text-body-small")?.innerText || "";
-      const about = document.querySelector('section[aria-label="Sobre"]')?.innerText || "";
+      const headline = document.querySelector(".text-body-medium.break-words")?.innerText || "";
+      const about = document.querySelector("section.pv-about-section")?.innerText || "";
 
-      return { name, title, location, about };
+      return {
+        name,
+        headline,
+        about
+      };
     });
 
     await browser.close();
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json(result);
+  } catch (error) {
+    console.error("Scraping failed", error);
+    res.status(500).json({ error: "Failed to scrape LinkedIn profile" });
   }
 });
 
-app.get("/", (_, res) => res.send("Scraper ativo"));
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
