@@ -1,6 +1,6 @@
 const express = require("express");
-const chromium = require("chrome-aws-lambda");
 const puppeteer = require("puppeteer-core");
+const chromium = require("chrome-aws-lambda");
 
 const app = express();
 
@@ -15,7 +15,7 @@ app.get("/linkedin-scrape", async (req, res) => {
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath || null,
+      executablePath: await chromium.executablePath,
       headless: chromium.headless,
     });
 
@@ -43,9 +43,10 @@ app.get("/linkedin-scrape", async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error("Scraping failed", error);
-    res
-      .status(500)
-      .json({ error: "Failed to scrape LinkedIn profile", details: error.toString() });
+    res.status(500).json({
+      error: "Failed to scrape LinkedIn profile",
+      details: error.toString(),
+    });
   }
 });
 
