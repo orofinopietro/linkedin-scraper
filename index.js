@@ -15,22 +15,27 @@ app.get("/linkedin-scrape", async (req, res) => {
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
+      executablePath: await chromium.executablePath || null,
       headless: chromium.headless,
     });
 
     const page = await browser.newPage();
-    await page.goto(profileUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.goto(profileUrl, {
+      waitUntil: "domcontentloaded",
+      timeout: 60000,
+    });
 
     const result = await page.evaluate(() => {
       const name = document.querySelector("h1")?.innerText || "";
-      const headline = document.querySelector(".text-body-medium.break-words")?.innerText || "";
-      const about = document.querySelector("section.pv-about-section")?.innerText || "";
+      const headline =
+        document.querySelector(".text-body-medium.break-words")?.innerText || "";
+      const about =
+        document.querySelector("section.pv-about-section")?.innerText || "";
 
       return {
         name,
         headline,
-        about
+        about,
       };
     });
 
@@ -38,7 +43,9 @@ app.get("/linkedin-scrape", async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error("Scraping failed", error);
-    res.status(500).json({ error: "Failed to scrape LinkedIn profile", details: error.toString() });
+    res
+      .status(500)
+      .json({ error: "Failed to scrape LinkedIn profile", details: error.toString() });
   }
 });
 
