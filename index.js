@@ -1,6 +1,5 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
-const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,15 +13,14 @@ app.get('/', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'], // importante para servidores
+      headless: true
     });
 
     const page = await browser.newPage();
     await page.goto(profileUrl, { waitUntil: 'networkidle2' });
 
-    // Ajuste conforme os dados que quer extrair
+    // Ajuste para extrair nome (exemplo)
     const name = await page.$eval('.text-heading-xlarge', el => el.innerText);
 
     await browser.close();
