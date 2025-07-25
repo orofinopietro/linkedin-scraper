@@ -27,16 +27,9 @@ app.get("/linkedin-scrape", async (req, res) => {
 
     const result = await page.evaluate(() => {
       const name = document.querySelector("h1")?.innerText || "";
-      const headline =
-        document.querySelector(".text-body-medium.break-words")?.innerText || "";
-      const about =
-        document.querySelector("section.pv-about-section")?.innerText || "";
-
-      return {
-        name,
-        headline,
-        about,
-      };
+      const headline = document.querySelector(".text-body-medium.break-words")?.innerText || "";
+      const about = document.querySelector("section.pv-about-section")?.innerText || "";
+      return { name, headline, about };
     });
 
     await browser.close();
