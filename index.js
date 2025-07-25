@@ -20,12 +20,8 @@ app.get("/linkedin-scrape", async (req, res) => {
     });
 
     const page = await browser.newPage();
-    await page.goto(profileUrl, {
-      waitUntil: "domcontentloaded",
-      timeout: 60000,
-    });
+    await page.goto(profileUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
 
-    // 🔁 Teste básico: obter título da página
     const pageTitle = await page.title();
     await browser.close();
 
@@ -33,7 +29,6 @@ app.get("/linkedin-scrape", async (req, res) => {
       status: "Browser funcionou!",
       title: pageTitle,
     });
-
   } catch (error) {
     console.error("Scraping failed", error);
     res.status(500).json({
