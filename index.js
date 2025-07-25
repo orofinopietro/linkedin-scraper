@@ -1,6 +1,6 @@
 const express = require("express");
-const puppeteer = require("puppeteer-core");
 const chromium = require("chrome-aws-lambda");
+const puppeteer = require("puppeteer-core");
 
 const app = express();
 
@@ -25,15 +25,15 @@ app.get("/linkedin-scrape", async (req, res) => {
       timeout: 60000,
     });
 
-    const result = await page.evaluate(() => {
-      const name = document.querySelector("h1")?.innerText || "";
-      const headline = document.querySelector(".text-body-medium.break-words")?.innerText || "";
-      const about = document.querySelector("section.pv-about-section")?.innerText || "";
-      return { name, headline, about };
+    // 🔁 Teste básico: obter título da página
+    const pageTitle = await page.title();
+    await browser.close();
+
+    res.json({
+      status: "Browser funcionou!",
+      title: pageTitle,
     });
 
-    await browser.close();
-    res.json(result);
   } catch (error) {
     console.error("Scraping failed", error);
     res.status(500).json({
